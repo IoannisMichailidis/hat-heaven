@@ -19,6 +19,7 @@ Below are previews of Hat Heaven on different devices, showcasing our responsive
 <ul>
     <li>Account Management: Easy login, registration, and logout process.</li>
     <li>Product Browsing: View a wide range of products with detailed descriptions. Includes an efficient pagination system for easy navigation through product lists</li>
+    <li>Search Functionality: Powerful search feature allowing users to quickly find specific products based on keywords.</li>
     <li>Shopping Cart: Add products to your cart and manage them easily.</li>
     <li>Checkout: Secure checkout with PayPal integration.</li>
     <li>Review System: Leave reviews for products and read others' feedback.</li>
