@@ -24,10 +24,6 @@ app.use(express.urlencoded({extended: true}));
 // Cookie parser moddleware (parse the cookie from the request)
 app.use(cookieParser());
 
-// Routes
-app.get('/', (req,res) => {
-    res.send('API is running...');
-});
 
 // Product Routes
 app.use('/api/products', productRoutes); // api/products is the prefix for whatever is inside the productRoutes
@@ -47,6 +43,24 @@ app.get('/api/config/paypal', (req,res) => res.send({ clientId: process.env.PAYP
 // Make /loads directory static
 const __dirname = path.resolve(); // set __dirname to current directory
 app.use('/uploads', express.static(path.join(__dirname,'uploads')));
+
+// Test for production version
+if (process.env.NODE_ENV === 'production') {
+    // PRODUCTION
+    // set static folder
+    app.use(epxress.static(path.join(__dirname,'/frontend/build')));
+
+    // any route that is not api will be redirected to index.html
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'))
+    });
+} else {
+   // DEV
+   // Routes
+    app.get('/', (req,res) => {
+        res.send('API is running...');
+    });
+}
 
 // If none of the above routers was hit then we go for the following handlers
 app.use(notFound);
