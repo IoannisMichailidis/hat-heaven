@@ -60,7 +60,9 @@ const ProductDetailsScreen = () => {
     console.log(category)
     return (
         <>
-            {category === undefined || category === 'all'? (
+            {category === undefined ? (
+                <Link className='btn btn-light my-3' to='/'>Go Back</Link>
+            ) : category === 'all' ? (
                 <Link className='btn btn-light my-3' to='/products/'>Go Back</Link>
             ) : (
                 <Link className='btn btn-light my-3' to={`/products/${category}`}>Go Back</Link>
