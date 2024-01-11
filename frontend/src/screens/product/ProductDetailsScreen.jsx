@@ -7,7 +7,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import Rating from '../../components/productscreen/Rating';
 import Loader from '../../components/common/Loader';
 import Message from '../../components/common/Message';
-import Meta from '../../components/Meta';
 // Slices
 import { useGetProductDetailsQuery, useCreateReviewMutation } from '../../slices/productsApiSlice';
 import { addToCart } from '../../slices/cartSlice';
@@ -74,7 +73,6 @@ const ProductDetailsScreen = () => {
                 <Message variant='danger'>{ error?.data?.message || error.error }</Message>
             ) : (
                 <>
-                    <Meta title={product.name}/> {/* Changed only the windows level name by setting the title */}
                     <Row>
                         <Col md={5}>
                             <Image src={product.image} alt={product.name} fluid/>
