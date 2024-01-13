@@ -49,18 +49,6 @@ if (process.env.NODE_ENV === 'production') {
     // PRODUCTION
     // set static folder
     app.use(express.static(path.join(__dirname,'/frontend/build')));
-    // ,{
-    //     // Cache-control to cache whatever (eg. images) except for the .html file. So, the response time is improved
-    //     setHeaders: (res, path) => {
-    //         if (path.endsWith('.html')) {
-    //             // All .html files should not be cached
-    //             res.setHeader('Cache-Control', 'no-cache');
-    //         } else {
-    //             // Other static files should use aggressive caching
-    //             res.setHeader('Cache-Control', 'public, max-age=31536000'); // 1 year long cache
-    //         }
-    //     }
-    // }));
 
     // any route that is not api will be redirected to index.html
     app.get('*', (req, res) => {
