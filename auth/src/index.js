@@ -14,11 +14,11 @@ dotenv.config();
 // Connect to MongoDB
 connectDB();
 
-if (!process.env.JWT_SECRET) {
-    throw new Error('JWT_SECRET must be defined');
-}
+// if (!process.env.JWT_SECRET) {
+//     throw new Error('JWT_SECRET must be defined');
+// }
 
-const port = process.env.PORT || 5001;
+const port = process.env.PORT || 5000;
 // Initialize the app
 const app = express();
 

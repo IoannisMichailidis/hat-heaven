@@ -6,7 +6,7 @@ deploy:
       - ./infra/k8s/*
 build:
   local:
-    push: false
+    push: false # Don't push to registry — images stay inside Minikube
   artifacts:
     - image: ioannismich/auth
       context: auth
@@ -15,4 +15,12 @@ build:
       sync:
         manual:
           - src: 'src/**/*.js'
+            dest: .
+    - image: ioannismich/client
+      context: client
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: '**/*.js'
             dest: .
