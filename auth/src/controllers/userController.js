@@ -1,6 +1,6 @@
-import asyncHandler from "../middleware/asyncHandler.js";
-import User from "../models/userModel.js";
-import generateToken from '../utils/generateToken.js';
+import {asyncHandler} from "@hat-heaven/common";
+import { User } from "@hat-heaven/common";
+import {generateToken} from '@hat-heaven/common';
 
 // ----------------------------------------------------------
 // Public
