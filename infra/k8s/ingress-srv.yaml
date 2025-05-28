@@ -23,4 +23,11 @@ spec:
               service:
                 name: client-srv
                 port:
-                  number: 3000              
+                  number: 3000
+          - path: /api/products/?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: products-srv
+                port:
+                  number: 5000                                
