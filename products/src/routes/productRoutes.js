@@ -16,7 +16,7 @@ import {checkObjectId} from '@hat-heaven/common'; // used wherever :id is in pla
 // Product Routes
 router.route('/')
     .get(getProducts)
-    .post(protect, admin, createProduct);            // protected route from anuthorized users using protect middleware && non admins using admin middleware
+    .post(createProduct);      //protect,  admin,      // protected route from anuthorized users using protect middleware && non admins using admin middleware
 
 router.route('/:id/reviews')
 .post(protect, checkObjectId, createProductReview);  // protected route from anuthorized users using protect middleware
@@ -29,8 +29,8 @@ router.route('/category/:category')
 
 router.route('/:id')
     .get(checkObjectId, getProductById)
-    .put(protect, admin, checkObjectId, updateProduct)          // protected route from anuthorized users using protect middleware && non admins using admin middleware
-    .delete(protect, admin, checkObjectId, deleteProduct);      // protected route from anuthorized users using protect middleware && non admins using admin middleware
+    .put(checkObjectId, updateProduct)    // protect, admin      // protected route from anuthorized users using protect middleware && non admins using admin middleware
+    .delete( checkObjectId, deleteProduct);  //protect, admin,    // protected route from anuthorized users using protect middleware && non admins using admin middleware
 
 
 
