@@ -2,11 +2,11 @@ import  mongoose  from "mongoose";
 
 // Create the review Schema
 const reviewSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: "User", // That comes from the User collection. So, I associate
-    },
+    // user: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     required: true,
+    //     ref: "User", // That comes from the User collection. So, I associate
+    // },
     name: {
         type: String,
         required: true,
@@ -25,11 +25,11 @@ const reviewSchema = new mongoose.Schema({
 
 // Create the product Schema
 const productSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: "User", // That comes from the User collection. So, I associate
-    },
+    // user: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     required: true,
+    //     ref: "User", // That comes from the User collection. So, I associate
+    // },
     name: {
         type: String,
         required: true,

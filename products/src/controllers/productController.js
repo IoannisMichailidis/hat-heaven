@@ -1,5 +1,7 @@
 import {asyncHandler} from "@hat-heaven/common";
 import { Product } from "../models/productModel.js";
+import { ProductCreatedPublisher, ProductUpdatedPublisher } from "../events/publishers/publishers.js";
+import { natsWrapper } from "../config/nats-wrapper.js";
 
 // ----------------------------------------------------------
 // Public
@@ -120,7 +122,7 @@ const createProduct = asyncHandler(async (req,res) => {
     const product = new Product({
         name:'Sample name',
         price:0,
-        user: req.user._id,
+        // user: req.user._id,
         image:'/images/sample.jpg',
         brand:'Sample brand',
         category:'Sample Category',
@@ -131,6 +133,21 @@ const createProduct = asyncHandler(async (req,res) => {
 
     // Save product to db
     const createdProduct = await product.save();
+
+    // Publish an event/channel/subject to NATS streaming server
+    const publisher = new ProductCreatedPublisher(natsWrapper.client);
+    // that process is async. Handled that process manually in the Publisher
+    await publisher.publish({
+        name: product.name,
+        price: product.price,
+        user: product.user,
+        image: product.image,
+        brand: product.brand,
+        category: product.category,
+        countInStock: product.countInStock,
+        description: product.description
+    });
+
 
     // Response with the product data
     res.status(201).json(createdProduct)
@@ -157,6 +174,20 @@ const updateProduct = asyncHandler(async (req,res) => {
 
         // Save product to db
         const updateProduct = await product.save();
+
+        // Publish an event/channel/subject to NATS streaming server
+        const publisher = new ProductUpdatedPublisher(natsWrapper.client);
+        await publisher.publish({
+            name: product.name,
+            price: product.price,
+            user: product.user,
+            image: product.image,
+            brand: product.brand,
+            category: product.category,
+            countInStock: product.countInStock,
+            description: product.description
+        });
+
 
         // Response with the product data
         res.status(200).json(updateProduct);
