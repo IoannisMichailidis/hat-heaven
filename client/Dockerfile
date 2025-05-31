@@ -19,6 +19,8 @@ WORKDIR /app
 COPY --from=builder /app/build ./frontend/build
 COPY server.js ./
 COPY package*.json ./
+COPY routes ./routes
+COPY uploads ./uploads
 
 # Install only what's needed to serve (Express)
 RUN npm install --only=production

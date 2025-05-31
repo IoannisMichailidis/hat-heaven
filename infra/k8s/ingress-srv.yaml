@@ -37,11 +37,18 @@ spec:
               service:
                 name: orders-srv
                 port:
-                  number: 5000                      
+                  number: 5000
+          # - path: /api/upload
+          #   pathType: ImplementationSpecific
+          #   backend:
+          #     service:
+          #       name: client-srv
+          #       port:
+          #         number: 3000
           - path: /?(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: client-srv
                 port:
-                  number: 3000                                                             
+                  number: 3000
