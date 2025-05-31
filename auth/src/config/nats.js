@@ -1,9 +1,4 @@
 import { natsWrapper } from "./nats-wrapper.js";
-import {
-  UserCreatedListener,
-  UserUpdatedListener,
-  UserDeletedListener,
-} from "../events/listeners/listeners.js";
 
 export const connectNATS = async (natsClusterId, natsClientId, natsURL) => {
   try {
@@ -19,11 +14,6 @@ export const connectNATS = async (natsClusterId, natsClientId, natsURL) => {
     // make sure we emit the close event of the client when any of those happens in terminal
     process.on("SIGINT", () => natsWrapper.client.close()); // rs to restart the listener in our terminal
     process.on("SIGTERM", () => natsWrapper.client.close()); // ctrl c in our terminal
-
-    // Listen to Channels/Events
-    new UserCreatedListener(natsWrapper.client).listen();
-    new UserUpdatedListener(natsWrapper.client).listen();
-    new UserDeletedListener(natsWrapper.client).listen();
   } catch (err) {
     console.log(`Error: ${err}`);
   }

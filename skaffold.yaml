@@ -31,4 +31,12 @@ build:
       sync:
         manual:
           - src: 'src/**/*.js'
-            dest: .            
+            dest: .
+    - image: ioannismich/orders
+      context: orders
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.js'
+            dest: .                         

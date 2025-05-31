@@ -1,5 +1,8 @@
 import { natsWrapper } from "./nats-wrapper.js";
 import {
+  ProductCreatedListener,
+  ProductUpdatedListener,
+  ProductDeletedListener,
   UserCreatedListener,
   UserUpdatedListener,
   UserDeletedListener,
@@ -21,6 +24,10 @@ export const connectNATS = async (natsClusterId, natsClientId, natsURL) => {
     process.on("SIGTERM", () => natsWrapper.client.close()); // ctrl c in our terminal
 
     // Listen to Channels/Events
+    new ProductCreatedListener(natsWrapper.client).listen();
+    new ProductUpdatedListener(natsWrapper.client).listen();
+    new ProductDeletedListener(natsWrapper.client).listen();
+
     new UserCreatedListener(natsWrapper.client).listen();
     new UserUpdatedListener(natsWrapper.client).listen();
     new UserDeletedListener(natsWrapper.client).listen();

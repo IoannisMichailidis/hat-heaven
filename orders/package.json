@@ -1,7 +1,7 @@
 {
-  "name": "products",
+  "name": "orders",
   "version": "1.0.0",
-  "description": "Products microservice for Hat Heaven",
+  "description": "Orders microservice for Hat Heaven",
   "type": "module",
   "main": "./src/index.js",
   "scripts": {
