@@ -1,28 +1,43 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: products-depl
+  name: orders-depl
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: products
+      app: orders
   template:
     metadata:
       labels:
-        app: products
+        app: orders
     spec:
       containers:
-        - name: products
-          image: ioannismich/products
+        - name: orders
+          image: ioannismich/orders
           env:
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: jwt-secret
                   key: JWT_SECRET
+            - name: PAYPAL_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: paypal-secret
+                  key: PAYPAL_CLIENT_ID
+            - name: PAYPAL_APP_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: paypal-secret
+                  key: PAYPAL_APP_SECRET
+            - name: PAYPAL_API_URL
+              valueFrom:
+                secretKeyRef:
+                  name: paypal-secret
+                  key: PAYPAL_API_URL
             - name: MONGO_URI
-              value: 'mongodb://products-mongo-srv:27017/products'
+              value: 'mongodb://orders-mongo-srv:27017/orders'
             - name: NATS_CLUSTER_ID
               value: hat-heaven
             - name: NATS_CLIENT_ID
@@ -37,12 +52,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: products-srv
+  name: orders-srv
 spec:
   selector:
-    app: products
+    app: orders
   ports:
-    - name: products
+    - name: orders
       protocol: TCP
       port: 5000
       targetPort: 5000
