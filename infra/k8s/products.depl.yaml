@@ -12,6 +12,11 @@ spec:
       labels:
         app: products
     spec:
+      # Init container waits for nats-srv:4222 to be reachable
+      initContainers:
+        - name: wait-for-nats
+          image: busybox
+          command: ['sh', '-c', 'until nc -z nats-srv 4222; do echo "Waiting for NATS..."; sleep 2; done']
       containers:
         - name: products
           image: ioannismich/products

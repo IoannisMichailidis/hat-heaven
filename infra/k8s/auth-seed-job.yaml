@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: auth-seed-job
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      # Init containers wait for auth-mongo-srv nats-srv to be reachable
+      initContainers:
+        - name: wait-for-mongo
+          image: busybox
+          command: ['sh', '-c', 'until nc -z auth-mongo-srv 27017; do echo "Waiting for MongoDB..."; sleep 2; done']
+
+        - name: wait-for-nats
+          image: busybox
+          command: ['sh', '-c', 'until nc -z nats-srv 4222; do echo "Waiting for NATS..."; sleep 2; done']
+      containers:
+        - name: auth-seeder
+          image: ioannismich/auth
+          command: ["npm", "run", "data:import"]
+          env:
+            - name: MONGO_URI
+              value: "mongodb://auth-mongo-srv:27017/auth"
+            - name: NATS_CLUSTER_ID
+              value: hat-heaven
+            - name: NATS_CLIENT_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name # Get the name of the pod
+            - name: NATS_URL
+              value: 'http://nats-srv:4222'
+      restartPolicy: Never
