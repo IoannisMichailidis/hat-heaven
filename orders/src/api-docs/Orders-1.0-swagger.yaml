@@ -1,0 +1,356 @@
+openapi: 3.0.0
+info:
+  version: '1.0'
+  title: Orders
+  description: API for managing orders in the Hat Heaven orders microservice
+  contact:
+    name: Hat-Heaven Team
+    url: https://www.linkedin.com/in/ioannis-michailidis-a6b8711b7/
+    email: michailidis.k.ioannis@gmail.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: http://hat-heaven.local:8080/api/orders
+    description: Local development server with tunnel
+  - url: http://hat-heaven.local:80/api/orders
+    description: Local development server
+
+paths:
+  /:
+    post:
+      summary: Create new order
+      tags: [Orders]
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderInput'
+      responses:
+        '201':
+          description: Order created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: Bad request
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: Get all orders (Admin only)
+      tags: [Admin]
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageNumberQueryParam'
+      responses:
+        '200':
+          description: List of all orders
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orders:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Order'
+                  page:
+                    type: integer
+                  pages:
+                    type: integer
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /myorders:
+    get:
+      summary: Get logged-in user's orders
+      tags: [Orders]
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageNumberQueryParam'
+      responses:
+        '200':
+          description: List of user's orders
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orders:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Order'
+                  page:
+                    type: integer
+                  pages:
+                    type: integer
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /{id}:
+    get:
+      summary: Get order by ID
+      tags: [Orders]
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderIdParam'
+      responses:
+        '200':
+          description: Order found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /{id}/pay:
+    put:
+      summary: Update order to paid
+      tags: [Orders]
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  example: 3VT96475F1794884Y
+                status:
+                  type: string
+                  example: COMPLETED
+                update_time:
+                  type: string
+                  format: date-time
+                payer:
+                  type: object
+                  properties:
+                    email_address:
+                      type: string
+                      example: sb-csqdx28998565@personal.example.com
+      responses:
+        '200':
+          description: Order marked as paid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /{id}/deliver:
+    put:
+      summary: Update order to delivered (Admin only)
+      tags: [Admin]
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderIdParam'
+      responses:
+        '200':
+          description: Order marked as delivered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: jwt
+
+  parameters:
+    OrderIdParam:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+    PageNumberQueryParam:
+      in: query
+      name: pageNumber
+      schema:
+        type: integer
+        default: 1
+      description: Page number for pagination
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Order not found
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: An unexpected error occurred
+
+  schemas:
+    Order:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: uuid
+        user:
+          type: string
+          format: uuid
+        orderItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        shippingAddress:
+          $ref: '#/components/schemas/ShippingAddress'
+        paymentMethod:
+          type: string
+          example: PayPal
+        paymentResult:
+          type: object
+          properties:
+            id:
+              type: string
+              example: 3VT96475F1794884Y
+            status:
+              type: string
+              example: COMPLETED
+            update_time:
+              type: string
+              format: date-time
+            email_address:
+              type: string
+              example: sb-csqdx28998565@personal.example.com
+        itemsPrice:
+          type: number
+          example: 53.99
+        taxPrice:
+          type: number
+          example: 8.1
+        shippingPrice:
+          type: number
+          example: 10
+        totalPrice:
+          type: number
+          example: 72.09
+        isPaid:
+          type: boolean
+          example: false
+        paidAt:
+          type: string
+          format: date-time
+        isDelivered:
+          type: boolean
+          example: false
+        deliveredAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    OrderInput:
+      type: object
+      required:
+        - orderItems
+        - shippingAddress
+        - paymentMethod
+      properties:
+        orderItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemInput'
+        shippingAddress:
+          $ref: '#/components/schemas/ShippingAddress'
+        paymentMethod:
+          type: string
+          example: PayPal
+
+    OrderItem:
+      type: object
+      properties:
+        product:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Cowboy Style 2
+        qty:
+          type: integer
+          example: 1
+        image:
+          type: string
+          example: /images/CowboyStyle2.jpg
+        price:
+          type: number
+          example: 39.99
+
+    OrderItemInput:
+      type: object
+      required:
+        - _id
+        - name
+        - qty
+        - image
+      properties:
+        _id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Cowboy Style 2
+        qty:
+          type: integer
+          example: 1
+        image:
+          type: string
+          example: /images/CowboyStyle2.jpg
+
+    ShippingAddress:
+      type: object
+      properties:
+        address:
+          type: string
+          example: Karaiskaki 19
+        city:
+          type: string
+          example: Thessaloniki
+        postalCode:
+          type: string
+          example: 56334
+        country:
+          type: string
+          example: Greece
