@@ -1,0 +1,416 @@
+openapi: 3.0.0
+info:
+  version: '1.0'
+  title: Products and Reviews
+  description: API for managing products and reviews in the Hat Heaven products microservice
+  contact:
+    name: Hat-Heaven Team
+    url: https://www.linkedin.com/in/ioannis-michailidis-a6b8711b7/
+    email: michailidis.k.ioannis@gmail.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: http://hat-heaven.local:8080/api/orders
+    description: Local development server with tunnel
+  - url: http://hat-heaven.local:80/api/orders
+    description: Local development server
+
+paths:
+  /:
+    get:
+      summary: Get all products
+      tags: [Products]
+      parameters:
+        - $ref: '#/components/parameters/PageNumberQueryParam'
+        - $ref: '#/components/parameters/KeywordQueryParam'      
+      responses:
+        '200':
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+                  page:
+                    type: integer
+                    example: 1
+                  pages:
+                    type: integer
+                    example: 5
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Create a new product
+      tags: [Admin]
+      security:
+        - cookieAuth: []
+      responses:
+        '201':
+          description: Product created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultProduct'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /{id}:
+    get:
+      summary: Get a product by ID
+      tags: [Products]
+      parameters:
+        - $ref: '#/components/parameters/ProductIdParam'
+      responses:
+        '200':
+          description: Product found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'          
+    put:
+      summary: Update a product
+      tags: [Admin]
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ProductIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+      responses:
+        '200':
+          description: Product updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'          
+    delete:
+      summary: Delete a product
+      tags: [Admin]
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ProductIdParam'
+      responses:
+        '200':
+          description: Product deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Product deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'          
+
+  /top:
+    get:
+      summary: Get top-rated products
+      description: Returns the top 3 products sorted by rating
+      tags:
+        - Products
+      responses:
+        '200':
+          description: A list of top products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /category/{category}:
+    get:
+      summary: Get products by category
+      description: Returns a paginated list of products filtered by category
+      tags:
+        - Products
+      parameters:
+        - $ref: '#/components/parameters/CategoryPathParam'
+        - $ref: '#/components/parameters/CategoryQueryParam'
+        - $ref: '#/components/parameters/PageNumberQueryParam'
+      responses:
+        '200':
+          description: Paginated list of products in the selected category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+                  page:
+                    type: integer
+                    example: 1
+                  pages:
+                    type: integer
+                    example: 3
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /{id}/reviews:
+    post:
+      summary: Add a product review
+      tags: [Reviews]
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ProductIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewInput'
+      responses:
+        '201':
+          description: Review added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+        '400':
+          description: Bad Request (e.g. already reviewed)
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  responses:
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: An unexpected error occurred
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Resource not found
+
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: jwt
+
+  parameters:
+    ProductIdParam:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+
+    CategoryPathParam:
+      in: path
+      name: category
+      required: true
+      description: Category name to filter products by (e.g., fedora, cowboy, bowler)
+      schema:
+        type: string
+        enum: [fedora, cowboy, bowler]
+
+    PageNumberQueryParam:
+      in: query
+      name: pageNumber
+      schema:
+        type: integer
+        default: 1
+      description: Page number for pagination
+    KeywordQueryParam:
+      in: query
+      name: keyword
+      schema:
+        type: string
+      required: false
+      description: Search keyword to filter products by name
+    CategoryQueryParam:
+      in: query
+      name: category
+      schema:
+        type: string
+        enum: [fedora, bowler, cowboy]
+      required: false
+      description: Category name to filter products by
+
+  schemas:
+    DefaultProduct:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: uuid
+        user:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Sample name
+        image:
+          type: string
+          example: /images/sample.jpg
+        brand:
+          type: string
+          example: Sample brand
+        category:
+          type: string
+          example: Sample Category
+        description:
+          type: string
+          example: Sample description
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+          example: []
+        rating:
+          type: number
+          example: 0
+        numReviews:
+          type: integer
+          example: 0
+        price:
+          type: number
+          example: 0
+        countInStock:
+          type: integer
+          example: 0
+
+    Product:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: uuid
+        user:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Fedora Style 2
+        image:
+          type: string
+          example: /images/FedoraStyle2.jpg
+        brand:
+          type: string
+          example: Goorin Bros
+        category:
+          type: string
+          example: fedora
+        description:
+          type: string
+          example: Crafted for comfort and style
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+        rating:
+          type: number
+          example: 5
+        numReviews:
+          type: integer
+          example: 1
+        price:
+          type: number
+          example: 49.5
+        countInStock:
+          type: integer
+          example: 10
+
+    ProductInput:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Fedora Style 2
+        price:
+          type: number
+          example: 49.5
+        description:
+          type: string
+          example: Crafted for comfort and style
+        brand:
+          type: string
+          example: Goorin Bros
+        category:
+          type: string
+          example: fedora
+        countInStock:
+          type: integer
+          example: 10
+        image:
+          type: string
+          example: /images/FedoraStyle2.jpg
+
+    Review:
+      type: object
+      properties:
+        user:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: John
+        rating:
+          type: number
+          example: 5
+        comment:
+          type: string
+          example: Special
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        createddAt:
+          type: string
+          format: date-time
+
+    ReviewInput:
+      type: object
+      required:
+        - rating
+        - comment
+      properties:
+        rating:
+          type: number
+          example: 5
+        comment:
+          type: string
+          example: Special

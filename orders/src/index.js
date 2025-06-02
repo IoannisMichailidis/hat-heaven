@@ -1,11 +1,17 @@
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import { connectDB } from "@hat-heaven/common";
+import {
+  connectDB,
+  notFound,
+  errorHandler,
+  loadYamlFile,
+} from "@hat-heaven/common";
 import { connectNATS } from "./config/nats.js";
 import orderRoutes from "./routes/orderRoutes.js";
-import { notFound, errorHandler } from "@hat-heaven/common";
-// import { natsWrapper } from './config/nats-wrapper.js';
+import swaggerUi from "swagger-ui-express";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
 
@@ -58,6 +64,18 @@ connectNATS(NATS_CLUSTER_ID, NATS_CLIENT_ID, NATS_URL);
 const app = express();
 
 // --------------------------------
+// Open API - Swagger
+// --------------------------------
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const absolutePath = path.resolve(
+  __dirname,
+  "./api-docs/Orders-1.0-swagger.yaml"
+);
+// Load your Swagger document
+const swaggerDocument = loadYamlFile(absolutePath);
+
+// --------------------------------
 // Middleware
 // --------------------------------
 // Body parser middleware (parse body data)
@@ -70,6 +88,17 @@ app.use(cookieParser());
 // --------------------------------
 // Routes
 // --------------------------------
+// Serve the API documentation if the document is successfully loaded
+console.log("swaggerDocument", swaggerDocument);
+if (swaggerDocument) {
+  app.use("/swagger/orders", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+  console.log(
+    `Swagger UI available at http://hat-heaven.local:${PORT}/swagger/orders`
+  );
+} else {
+  console.error("Swagger document could not be loaded.");
+}
+
 app.use("/api/orders", orderRoutes); // api/orders is the prefix for whatever is inside the productRoutes
 
 // PayPal Route

@@ -10,11 +10,25 @@ spec:
     - host: hat-heaven.local
       http:
         paths:
+          - path: /swagger/auth/?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: auth-srv
+                port:
+                  number: 5000
           - path: /api/users/?(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: auth-srv
+                port:
+                  number: 5000
+          - path: /swagger/products/?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: products-srv
                 port:
                   number: 5000
           - path: /api/products/?(.*)
@@ -23,7 +37,14 @@ spec:
               service:
                 name: products-srv
                 port:
-                  number: 5000      
+                  number: 5000
+          - path: /swagger/orders/?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: orders-srv
+                port:
+                  number: 5000
           - path: /api/orders/?(.*)
             pathType: ImplementationSpecific
             backend:
