@@ -1,18 +1,16 @@
-<h1>Hat Heaven Application README</h1>
+<h1>Hat Heaven Microservices Application</h1>
+
 <h2>Overview</h2>
-Welcome to Hat Heaven, an innovative e-commerce web application dedicated to the sale of hats. Designed for both hat enthusiasts and store administrators, Hat Heaven simplifies the process of buying and managing a diverse range of hat styles online. This application is ideal for customers seeking a specialized, hassle-free hat shopping experience, and for admins operating a hat-focused e-commerce store.
-<h2>Responsive Design</h2>
-Hat Heaven boasts a responsive design, ensuring an optimal browsing experience on various devices. Whether you are shopping on a PC or browsing through your mobile, our interface adapts seamlessly to your device for a consistent and user-friendly experience.
-<h2>Preview of Hat Heaven</h2>
+<p><strong>Hat Heaven</strong> is a modern e-commerce application dedicated to stylish hats. The project has evolved from a monolithic app to a <strong>microservices-based architecture</strong> to support scalability and maintainability.</p>
+
+<h2>Frontend Previews</h2>
 Below are previews of Hat Heaven on different devices, showcasing our responsive, user-friendly interface and sleek design.
 
 <h3>PC View:</h3>
-
-![Screenshot of Hat Heaven on PC](./frontend/src/assets/hat-heaven-pc-view.jpg)
+<img src="./client/frontend/src/assets/hat-heaven-pc-view.jpg" alt="Hat Heaven on PC" style="width:600px;">
 
 <h3>Mobile View:</h3>
-
-![Screenshot of Hat Heaven on Mobile](./frontend/src/assets/hat-heaven-mobile-view.jpg)
+<img src="./client/frontend/src/assets/hat-heaven-mobile-view.jpg" alt="Hat Heaven on Mobile" style="width:200px;height:300px;">
 
 <h2>Key Features</h2>
 <h3>User Features:</h3>
@@ -41,18 +39,112 @@ Below are previews of Hat Heaven on different devices, showcasing our responsive
 <h3>Back-End</h3>
 <ul>
     <li>Node.js with Express: A robust server-side framework.</li>
-    <li>MongoDB with Mongo Atlas: Utilizing MongoDB for a scalable and efficient database hosted on Mongo Atlas.</li>
+    <li>MongoDB: Utilizing MongoDB for a scalable and efficient database.</li>
     <li>JWT Authentication: Implemented JSON Web Token (JWT) for secure and reliable user authentication.</li>
 </ul>
 
-<h2>Getting Started with Hat Heaven</h2>
+<h2>Microservices Architecture</h2>
+<ul>
+  <li><strong>Auth Service</strong>: Handles user registration, login, authentication, and user management.</li>
+  <li><strong>Products Service</strong>: Manages product listings, product details, and user reviews.</li>
+  <li><strong>Orders Service</strong>: Manages the order placement, payment, and status tracking.</li>
+  <li><strong>Client Service</strong>: A React-based frontend that interacts with all backend services.</li>
+</ul>
 
-<h3>MongoDB Setup</h3>
-<p>To fully utilize the Hat Heaven application, you need to set up a MongoDB database. Use MongoDB Atlas, which offers a managed MongoDB service. After setting up your account and cluster, create a new database and note your connection string (URI), which you will use in the application.</p>
-<h4>Update the .env File</h4>
-<p>Ensure your <code>.env</code> file includes the <code>MONGO_URI</code> key with the connection string to your MongoDB database:</p>
-<pre>MONGO_URI=your_connection_string_here</pre>
-<p>This allows the application to connect to your MongoDB database.</p>
+<h2>Event-Driven Communication</h2>
+<p>All services communicate asynchronously through a <strong>NATS Streaming Server</strong>. This facilitates event-driven architecture and loose coupling.</p>
+
+<h2>Shared Package</h2>
+<p>A reusable package <code>@hat-heaven/common</code> is used across all services to share logic like middleware, error handling, and event definitions. It is published to <a href="https://www.npmjs.com/package/@hat-heaven/common">npmjs.com</a>.</p>
+
+<h2>Running the Application Development Environment</h2>
+<p>The entire application runs on a Kubernetes cluster managed locally with <strong>Minikube</strong>. Development workflow is powered by <strong>Skaffold</strong> which automatically rebuilds and redeploys on code changes.</p>
+
+<h3>Prerequisites</h3>
+<ul>
+  <li><a href="https://www.docker.com/">Docker</a></li>
+  <li><a href="https://minikube.sigs.k8s.io/">Minikube</a></li>
+  <li><a href="https://skaffold.dev/">Skaffold</a></li>
+</ul>
+
+<h3>Start the Cluster</h3>
+<ul>
+<li>
+  <pre>minikube start</pre>
+</li>
+<li>create ingress in minikube</li>
+<li>create skaffold in minikube</li>
+<li>
+  Execute the imperative commands to the cluster to add secrets
+  <pre>
+- kubectl create secret generic jwt-secret --from-literal=JWT_SECRET={YOUR_SECRET}
+- kubectl create secret generic paypal-secret --from-literal=PAYPAL_CLIENT_ID={YOUR_PAYPAL_CLIENT_ID} --from-literal=PAYPAL_APP_SECRET={YOUR_PAYPAL_APP_SECRET} --from-literal=PAYPAL_API_URL={YOUR_PAYPAL_API_URL}
+  </pre>
+</li>
+<li>
+move to the directory of hat-heaven
+ 
+</li>
+<li> start the skaffold
+ <pre>skaffold dev</pre>
+ </li>
+ <li> create a tunnel
+ <pre>kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8080:80</pre>
+ </li>
+  <li> Add the  a record to your hosts file
+  <pre>127.0.0.1 hat-heaven.local</pre>
+ </li>
+</ul>
+
+<h3>Access the Application</h3>
+<pre>
+hat-heaven.local:8080
+</pre>
+
+<h2>Production Deployment & CI/CD</h2>
+<p>
+The Hat Heaven application is also deployed to a production environment on <strong>AWS EKS (Elastic Kubernetes Service)</strong>. This setup is fully managed via infrastructure-as-code and GitOps principles.
+</p>
+
+<h3>Infrastructure as Code</h3>
+<p>
+All AWS cloud resources, including EKS cluster, networking, and security settings, are provisioned and managed using <strong>Terraform</strong>. You can find the code in the following repository:
+</p>
+<ul>
+  <li>
+    <a href="https://gitlab.com/Ioannis_Mich/infra-automation-eks" target="_blank">Hat Heaven Infrastructure (Terraform)</a>
+  </li>
+</ul>
+
+<h3>GitOps Deployment</h3>
+<p>
+The production Kubernetes resources—such as Deployments, Services, Ingresses, and Secrets—are managed through a GitOps workflow using <strong>ArgoCD</strong>. These manifests are version-controlled in a dedicated repository:
+</p>
+<ul>
+  <li>
+    <a href="https://gitlab.com/Ioannis_Mich/hat-heaven-gitops" target="_blank">Hat Heaven GitOps (Kubernetes Resources)</a>
+  </li>
+</ul>
+
+<h3>CI/CD Workflow</h3>
+<p>
+Continuous integration and deployment pipelines are used to automate:
+</p>
+<ul>
+  <li>Docker image builds and pushes of all microservices</li>
+  <li>Tagging and release management</li>
+  <li>Automatic updates of Kubernetes manifests</li>
+</ul>
+<p>
+This ensures that every code change can be tested, deployed, and monitored in a reliable, repeatable way.
+</p>
+
+<h2>Swagger Documentation</h2>
+<ul>
+  <li><code>/swagger/auth</code> – Auth endpoints</li>
+  <li><code>/swagger/products</code> – Product and review endpoints</li>
+  <li><code>/swagger/orders</code> – Order endpoints</li>
+</ul>
 
 <h3>Database Schemas</h3>
 <p>The application uses MongoDB with Mongoose for data modeling. Below are the schemas defined for the application:</p>
@@ -311,29 +403,5 @@ Below are previews of Hat Heaven on different devices, showcasing our responsive
 </table>
 <p>All schemas include timestamps automatically added by Mongoose, noting when each document is created and last updated.</p>
 
-<h3>Database Setup</h3>
-<ul>
-    <li>Populate the Database: Use 'npm run data:import' in the root directory to import initial data into your MongoDB database.</li>
-    <li>Clear the Database: Execute 'npm run data:destroy' to remove all data from your database, allowing for a fresh start.
-    </li>
-</ul>
-
-<h3>Running the Application in Development</h3>
-<ul>
-    <li>Install Dependencies: Navigate to the root directory and install necessary dependencies:</li>
-    <pre>npm install
-cd frontend
-npm install</pre>
-    <li>Set Environment Variables: Create a .env file in your root directory based on example.env with appropriate values for the development environment.</li>
-    <li>Start the Development Servers: Run both the frontend and backend servers concurrently:</li>
-    <pre>npm run dev</pre>
-</ul>
-<h3>Running the Application in Production Using Docker</h3>
-<ul>
-    <li>Build the Docker Image:</li>
-    <pre>docker build -t hatheaven:latest .</pre>
-    <li>Create a Production .env File: Based on example.env, fill in production-appropriate values and save this file as .env in your project root. Ensure this file is not checked into version control.</li>
-    <li>Run the Docker Container:</li>
-    <pre>docker run -p 5000:5000 --env-file ./.env hatheaven:latest</pre>
-</ul>
-<p>Hat Heaven offers a comprehensive e-commerce solution, combining user convenience with powerful administrative tools, all wrapped in a modern, responsive design.</p>
+<h2>Conclusion</h2>
+<p>Hat Heaven demonstrates how e-commerce platforms can be architected for modern development using microservices, event-driven design, and cloud-native tooling.</p>
